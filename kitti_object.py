@@ -12,7 +12,7 @@ import cv2
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(BASE_DIR)
-OUTPUT_DIR = os.path.join(ROOT_DIR, "kitti_object_vis", "output", "mix-dgp")
+OUTPUT_DIR = os.path.join(ROOT_DIR, "kitti_object_vis", "output", "mix-monocd")
 
 # Create output directory with proper permissions
 try:
@@ -203,7 +203,7 @@ def show_image_with_boxes(img, objects, calib, show3d=True, depth=None, data_idx
     
     # 繪製 Ground Truth 框 (綠色)
     for obj in objects:
-        if obj.type == "DontCare":
+        if obj.type == "":
             continue
         if obj.type == "Car":
             cv2.rectangle(

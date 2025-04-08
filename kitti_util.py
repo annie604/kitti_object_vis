@@ -54,6 +54,8 @@ class Object3d(object):
     def __init__(self, label_file_line):
         data = label_file_line.split(" ")
         data[1:] = [float(x) for x in data[1:]]
+        # data = label_file_line.split(" ")        
+        print(data)
 
         # extract label, truncation, occlusion
         self.type = data[0]  # 'Car', 'Pedestrian', ...
@@ -372,7 +374,9 @@ def inverse_rigid_trans(Tr):
 
 
 def read_label(label_filename):
-    lines = [line.rstrip() for line in open(label_filename)]
+    # lines = [line.rstrip() for line in open(label_filename)]
+    lines = [line.rstrip() for line in open(label_filename) if line.strip() != ""]
+
     objects = [Object3d(line) for line in lines]
     return objects
 
