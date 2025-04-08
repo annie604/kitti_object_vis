@@ -1,5 +1,5 @@
 .idea/*
 imgs
 *.pdf
-*.png
 __pycache__
+output/*

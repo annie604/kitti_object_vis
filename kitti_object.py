@@ -12,9 +12,22 @@ import cv2
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(BASE_DIR)
+OUTPUT_DIR = os.path.join(ROOT_DIR, "kitti_object_vis", "output", "mix-dgp")
+
+# Create output directory with proper permissions
+try:
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    print(f"Output directory created/confirmed at: {OUTPUT_DIR}")
+except Exception as e:
+    print(f"Error creating output directory: {e}")
+    # Fallback to /tmp if home directory is not writable
+    OUTPUT_DIR = os.path.join("/tmp", "kitti_output")
+    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    print(f"Using fallback output directory: {OUTPUT_DIR}")
+
 sys.path.append(os.path.join(ROOT_DIR, "mayavi"))
 import kitti_util as utils
-import argparse
+import argparse 
 
 try:
     raw_input  # Python 2
@@ -249,16 +262,24 @@ def show_image_with_boxes(img, objects, calib, show3d=True, depth=None, data_idx
             img2 = utils.draw_projected_box3d(img2, box3d_pts_2d, color=(0, 0, 255))  # 紅色
 
 
-    # print("img1:", img1.shape)
-    # cv2.imshow("2dbox", img1)
-    cv2.imwrite("output/2dbox/{}.png".format(data_idx), img1)
-    # print("img3:",img3.shape)
-    # Image.fromarray(img3).show()
+    try:
+        img1_path = f"{OUTPUT_DIR}/{data_idx}_2dbox.png"
+        print(f"Saving 2D boxes to {img1_path}")
+        cv2.imwrite(img1_path, img1)
+        print(f"Successfully saved 2D boxes")
+    except Exception as e:
+        print(f"Failed to save 2D box image: {e}")
+    
     show3d = True
     if show3d:
-        # print("img2:",img2.shape)
-        cv2.imwrite("output/3dbox/{}.png".format(data_idx), img2)
-        # cv2.imshow("3dbox", img2)
+        try:
+            img2_path = f"{OUTPUT_DIR}/{data_idx}_3dbox.png"
+            print(f"Saving 3D boxes to {img2_path}")
+            cv2.imwrite(img2_path, img2)
+            print(f"Successfully saved 3D boxes")
+        except Exception as e:
+            print(f"Failed to save 3D box image: {e}")
+    
     if depth is not None:
         cv2.imshow("depth", depth)
     
@@ -402,6 +423,7 @@ def show_lidar_with_depth(
     constraint_box=False,
     pc_label=False,
     save=False,
+    data_idx=None,
 ):
     """ Show all LiDAR points.
         Draw 3d box in LiDAR point cloud (in velo coord system) """
@@ -431,7 +453,6 @@ def show_lidar_with_depth(
         draw_lidar(depth_pc_velo, fig=fig, pts_color=(1, 1, 1))
 
         if save:
-            data_idx = 0
             vely_dir = "data/object/training/depth_pc"
             save_filename = os.path.join(vely_dir, "%06d.bin" % (data_idx))
             print(save_filename)
@@ -483,6 +504,19 @@ def show_lidar_with_depth(
                 line_width=1,
                 figure=fig,
             )
+    
+    # Set the view before saving the figure
+    mlab.view(azimuth=180, elevation=70, distance=30, focalpoint=(5, 0, 5))
+    
+    if data_idx is not None:
+        try:
+            save_path = f"{OUTPUT_DIR}/{data_idx}_lidar.png"
+            print(f"Saving figure to {save_path}")
+            mlab.savefig(save_path)
+        except Exception as e:
+            print(f"Failed to save figure: {e}")
+    
+    # Keep the view setting when showing the visualization
     mlab.show(1)
 
 
@@ -844,6 +878,7 @@ def dataset_viz(root_dir, args):
                 constraint_box=args.const_box,
                 save=args.save_depth,
                 pc_label=args.pc_label,
+                data_idx=data_idx,  # Pass data_idx here
             )
             # show_lidar_with_boxes(pc_velo, objects, calib, True, img_width, img_height, \
             #    objects_pred, depth, img)
@@ -996,7 +1031,9 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.pred:
         assert os.path.exists(args.dir + "/" + args.split + "/pred")
-
+    
+    print(f"Files will be saved to: {OUTPUT_DIR}")
+    
     if args.vis:
         dataset_viz(args.dir, args)
     if args.gen_depth:
