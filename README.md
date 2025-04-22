@@ -1,6 +1,6 @@
 # KITTI Object data transformation and visualization
 
-
+記得要去更改[OUTPUT_DIR](kitti_object.py#L15)
 
 ## Dataset
 
@@ -122,6 +122,11 @@ $ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis
 Show LiDAR and image
 ```
 $ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis --show_image_with_boxes
+```
+
+Show LiDAR and image (GT&Pred)
+```
+$ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis --show_image_with_boxes -p
 ```
 
 Show LiDAR and image with specific index

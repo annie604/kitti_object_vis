@@ -54,8 +54,6 @@ class Object3d(object):
     def __init__(self, label_file_line):
         data = label_file_line.split(" ")
         data[1:] = [float(x) for x in data[1:]]
-        # data = label_file_line.split(" ")        
-        print(data)
 
         # extract label, truncation, occlusion
         self.type = data[0]  # 'Car', 'Pedestrian', ...

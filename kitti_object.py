@@ -12,7 +12,7 @@ import cv2
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(BASE_DIR)
-OUTPUT_DIR = os.path.join(ROOT_DIR, "kitti_object_vis", "output", "mix-monocd")
+OUTPUT_DIR = os.path.join(ROOT_DIR, "kitti_object_vis", "output", "day-monodgp")
 
 # Create output directory with proper permissions
 try:
