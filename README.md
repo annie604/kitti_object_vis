@@ -128,6 +128,11 @@ Show LiDAR and image (GT&Pred)
 ```
 $ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis --show_image_with_boxes -p
 ```
+Show LiDAR and image with specific folder name
+```
+$ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis --show_image_with_boxes -p -o half_monodgp_kd_style
+```
+
 
 Show LiDAR and image with specific index
 ```

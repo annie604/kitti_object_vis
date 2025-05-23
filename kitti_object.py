@@ -12,18 +12,12 @@ import cv2
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(BASE_DIR)
-OUTPUT_DIR = os.path.join(ROOT_DIR, "kitti_object_vis", "output", "day-monodgp")
 
-# Create output directory with proper permissions
-try:
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    print(f"Output directory created/confirmed at: {OUTPUT_DIR}")
-except Exception as e:
-    print(f"Error creating output directory: {e}")
-    # Fallback to /tmp if home directory is not writable
-    OUTPUT_DIR = os.path.join("/tmp", "kitti_output")
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
-    print(f"Using fallback output directory: {OUTPUT_DIR}")
+# Output directory will be set by command line arguments or use default
+DEFAULT_OUTPUT_SUBDIR = "monodetr-monocd"
+
+# OUTPUT_DIR will be initialized in the main function
+OUTPUT_DIR = None
 
 sys.path.append(os.path.join(ROOT_DIR, "mayavi"))
 import kitti_util as utils
@@ -787,6 +781,7 @@ def show_lidar_topview_with_boxes(pc_velo, objects, calib, objects_pred=None):
 
 
 def dataset_viz(root_dir, args):
+    global OUTPUT_DIR
     dataset = kitti_object(root_dir, split=args.split, args=args)
     ## load 2d detection results
     #objects2ds = read_det_file("box2d.list")
@@ -997,6 +992,14 @@ if __name__ == "__main__":
         metavar="N",
         help="predicted boxes  (default: pred)",
     )
+    parser.add_argument(
+        "-o",
+        "--outdir",
+        type=str,
+        default=DEFAULT_OUTPUT_SUBDIR,
+        metavar="N",
+        help="specify output directory name (default: monodetr-monocd)",
+    )
     parser.add_argument("--gen_depth", action="store_true", help="generate depth")
     parser.add_argument("--vis", action="store_true", help="show images")
     parser.add_argument("--depth", action="store_true", help="load depth")
@@ -1031,6 +1034,19 @@ if __name__ == "__main__":
     args = parser.parse_args()
     if args.pred:
         assert os.path.exists(args.dir + "/" + args.split + "/pred")
+    
+    OUTPUT_DIR = os.path.join(ROOT_DIR, "kitti_object_vis", "output", args.outdir)
+
+    # Create output directory with proper permissions
+    try:
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+        print(f"Output directory created/confirmed at: {OUTPUT_DIR}")
+    except Exception as e:
+        print(f"Error creating output directory: {e}")
+        # Fallback to /tmp if home directory is not writable
+        OUTPUT_DIR = os.path.join("/tmp", "kitti_output", args.outdir)
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
+        print(f"Using fallback output directory: {OUTPUT_DIR}")
     
     print(f"Files will be saved to: {OUTPUT_DIR}")
     
