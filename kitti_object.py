@@ -52,12 +52,16 @@ class kitti_object(object):
         lidar_dir = "velodyne"
         depth_dir = "depth"
         pred_dir = "pred"
+        image_dir = "image_2"  # Default image directory
+        
         if args is not None:
             lidar_dir = args.lidar
             depth_dir = args.depthdir
             pred_dir = args.preddir
-
-        self.image_dir = os.path.join(self.split_dir, "image_2")
+            if hasattr(args, 'imagedir'):
+                image_dir = args.imagedir  # Use custom image directory if specified
+        
+        self.image_dir = os.path.join(self.split_dir, image_dir)
         self.label_dir = os.path.join(self.split_dir, "label_2")
         self.calib_dir = os.path.join(self.split_dir, "calib")
 
@@ -999,6 +1003,13 @@ if __name__ == "__main__":
         default=DEFAULT_OUTPUT_SUBDIR,
         metavar="N",
         help="specify output directory name (default: monodetr-monocd)",
+    )
+    parser.add_argument(
+        "--imagedir",
+        type=str,
+        default="image_2",
+        metavar="N",
+        help="specify image directory name (default: image_2, can be night_2 etc.)",
     )
     parser.add_argument("--gen_depth", action="store_true", help="generate depth")
     parser.add_argument("--vis", action="store_true", help="show images")
