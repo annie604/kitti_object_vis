@@ -138,6 +138,13 @@ Show LiDAR and image with specific image dir
 $ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis --show_image_with_boxes -p -o half_monodgp_kd_style  --imagedir night_2
 ```
 
+Show LiDAR and image without GT
+```
+$ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis --show_image_with_boxes -p -o half_monodgp_kd_style  --imagedir night_2 
+```
+
+python kitti_object.py --show_image_with_boxes --vis -p
+
 Show LiDAR and image with specific index
 ```
 $ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis --show_image_with_boxes --ind 1 

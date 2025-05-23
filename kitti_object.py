@@ -14,7 +14,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 ROOT_DIR = os.path.dirname(BASE_DIR)
 
 # Output directory will be set by command line arguments or use default
-DEFAULT_OUTPUT_SUBDIR = "monodetr-monocd"
+DEFAULT_OUTPUT_SUBDIR = "temp"
 
 # OUTPUT_DIR will be initialized in the main function
 OUTPUT_DIR = None
@@ -193,50 +193,51 @@ def viz_kitti_video():
     return
 
 
-def show_image_with_boxes(img, objects, calib, show3d=True, depth=None, data_idx=0, objects_pred=None):
+def show_image_with_boxes(img, objects, calib, show3d=True, depth=None, data_idx=0, objects_pred=None, show_gt=False):
     """ Show image with 2D bounding boxes """
     img1 = np.copy(img)  # for 2d bbox
     img2 = np.copy(img)  # for 3d bbox
     #img3 = np.copy(img)  # for 3d bbox
     
-    # 繪製 Ground Truth 框 (綠色)
-    for obj in objects:
-        if obj.type == "":
-            continue
-        if obj.type == "Car":
-            cv2.rectangle(
-            img1,
-            (int(obj.xmin), int(obj.ymin)),
-            (int(obj.xmax), int(obj.ymax)),
-            (0, 255, 0),
-            2,
-        )
-        if obj.type == "Pedestrian":
-            cv2.rectangle(
-            img1,
-            (int(obj.xmin), int(obj.ymin)),
-            (int(obj.xmax), int(obj.ymax)),
-            (255, 255, 0),
-            2,
-        )
-        if obj.type == "Cyclist":
-            cv2.rectangle(
-            img1,
-            (int(obj.xmin), int(obj.ymin)),
-            (int(obj.xmax), int(obj.ymax)),
-            (0, 255, 255),
-            2,
-        )
-        box3d_pts_2d, _ = utils.compute_box_3d(obj, calib.P)
-        if box3d_pts_2d is None:
-            print("something wrong in the 3D box.")
-            continue
-        if obj.type == "Car":
-            img2 = utils.draw_projected_box3d(img2, box3d_pts_2d, color=(0, 255, 0))
-        elif obj.type == "Pedestrian":
-            img2 = utils.draw_projected_box3d(img2, box3d_pts_2d, color=(255, 255, 0))
-        elif obj.type == "Cyclist":
-            img2 = utils.draw_projected_box3d(img2, box3d_pts_2d, color=(0, 255, 255))
+    # 繪製 Ground Truth 框 (綠色) - only if show_gt is True
+    if show_gt:
+        for obj in objects:
+            if obj.type == "":
+                continue
+            if obj.type == "Car":
+                cv2.rectangle(
+                img1,
+                (int(obj.xmin), int(obj.ymin)),
+                (int(obj.xmax), int(obj.ymax)),
+                (0, 255, 0),
+                2,
+            )
+            if obj.type == "Pedestrian":
+                cv2.rectangle(
+                img1,
+                (int(obj.xmin), int(obj.ymin)),
+                (int(obj.xmax), int(obj.ymax)),
+                (255, 255, 0),
+                2,
+            )
+            if obj.type == "Cyclist":
+                cv2.rectangle(
+                img1,
+                (int(obj.xmin), int(obj.ymin)),
+                (int(obj.xmax), int(obj.ymax)),
+                (0, 255, 255),
+                2,
+            )
+            box3d_pts_2d, _ = utils.compute_box_3d(obj, calib.P)
+            if box3d_pts_2d is None:
+                print("something wrong in the 3D box.")
+                continue
+            if obj.type == "Car":
+                img2 = utils.draw_projected_box3d(img2, box3d_pts_2d, color=(0, 255, 0))
+            elif obj.type == "Pedestrian":
+                img2 = utils.draw_projected_box3d(img2, box3d_pts_2d, color=(255, 255, 0))
+            elif obj.type == "Cyclist":
+                img2 = utils.draw_projected_box3d(img2, box3d_pts_2d, color=(0, 255, 255))
 
     # 繪製預測框 (紅色)
     if objects_pred is not None:
@@ -422,6 +423,7 @@ def show_lidar_with_depth(
     pc_label=False,
     save=False,
     data_idx=None,
+    show_gt=False,
 ):
     """ Show all LiDAR points.
         Draw 3d box in LiDAR point cloud (in velo coord system) """
@@ -458,25 +460,26 @@ def show_lidar_with_depth(
             depth_pc_velo = depth_pc_velo.astype(np.float32)
             depth_pc_velo.tofile(save_filename)
 
-    # color = (0, 1, 0)
-    for obj in objects:
-        if obj.type == "DontCare":
-            continue
-        # Draw 3d bounding box
-        _, box3d_pts_3d = utils.compute_box_3d(obj, calib.P)
-        box3d_pts_3d_velo = calib.project_rect_to_velo(box3d_pts_3d)
-        print("box3d_pts_3d_velo:")
-        print(box3d_pts_3d_velo)
+    # Draw Ground Truth boxes - only if show_gt is True
+    if show_gt:
+        for obj in objects:
+            if obj.type == "DontCare":
+                continue
+            # Draw 3d bounding box
+            _, box3d_pts_3d = utils.compute_box_3d(obj, calib.P)
+            box3d_pts_3d_velo = calib.project_rect_to_velo(box3d_pts_3d)
+            print("box3d_pts_3d_velo:")
+            print(box3d_pts_3d_velo)
 
-        #TODO: change the color of boxes
-        if obj.type == "Car":
-            draw_gt_boxes3d([box3d_pts_3d_velo], fig=fig, color=(0,1,0), label=obj.type)
-        elif obj.type == "Pedestrian":
-            draw_gt_boxes3d([box3d_pts_3d_velo], fig=fig, color=(0,1,1), label=obj.type)
-        elif obj.type == "Cyclist":
-            draw_gt_boxes3d([box3d_pts_3d_velo], fig=fig, color=(1,1,0), label=obj.type)
+            #TODO: change the color of boxes
+            if obj.type == "Car":
+                draw_gt_boxes3d([box3d_pts_3d_velo], fig=fig, color=(0,1,0), label=obj.type)
+            elif obj.type == "Pedestrian":
+                draw_gt_boxes3d([box3d_pts_3d_velo], fig=fig, color=(0,1,1), label=obj.type)
+            elif obj.type == "Cyclist":
+                draw_gt_boxes3d([box3d_pts_3d_velo], fig=fig, color=(1,1,0), label=obj.type)
 
-
+    # Draw prediction boxes
     if objects_pred is not None:
         color = (1, 0, 0)
         for obj in objects_pred:
@@ -860,7 +863,7 @@ def dataset_viz(root_dir, args):
         # show_image_with_boxes_3type(img, objects, calib, objects2d, data_idx, objects_pred)
         if args.show_image_with_boxes:
             # Draw 2d and 3d boxes on image
-            show_image_with_boxes(img, objects, calib, True, depth, data_idx, objects_pred)
+            show_image_with_boxes(img, objects, calib, True, depth, data_idx, objects_pred, args.show_gt)
         if args.show_lidar_with_depth:
             # Draw 3d box in LiDAR point cloud
             show_lidar_with_depth(
@@ -878,6 +881,7 @@ def dataset_viz(root_dir, args):
                 save=args.save_depth,
                 pc_label=args.pc_label,
                 data_idx=data_idx,  # Pass data_idx here
+                show_gt=args.show_gt,  # Pass show_gt here
             )
             # show_lidar_with_boxes(pc_velo, objects, calib, True, img_width, img_height, \
             #    objects_pred, depth, img)
@@ -1010,6 +1014,11 @@ if __name__ == "__main__":
         default="image_2",
         metavar="N",
         help="specify image directory name (default: image_2, can be night_2 etc.)",
+    )
+    parser.add_argument(
+        "--show_gt", 
+        action="store_true", 
+        help="show ground truth boxes in visualization (default: hide GT boxes)"
     )
     parser.add_argument("--gen_depth", action="store_true", help="generate depth")
     parser.add_argument("--vis", action="store_true", help="show images")
