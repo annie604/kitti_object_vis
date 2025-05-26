@@ -138,12 +138,28 @@ Show LiDAR and image with specific image dir
 $ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis --show_image_with_boxes -p -o half_monodgp_kd_style  --imagedir night_2
 ```
 
-Show LiDAR and image without GT
+Show LiDAR and image with GT
 ```
-$ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis --show_image_with_boxes -p -o half_monodgp_kd_style  --imagedir night_2 
+$ python kitti_object.py --show_lidar_with_depth --img_fov --const_box --vis --show_image_with_boxes -p -o half_monodgp_kd_style  --imagedir night_2 --show_gt
 ```
 
-python kitti_object.py --show_image_with_boxes --vis -p
+The output will be organized into subdirectories based on image type and GT settings:
+- `--imagedir image_2` → creates `day/` subdirectory
+- `--imagedir night_2` → creates `night/` subdirectory  
+- `--show_gt` flag → adds `_gt` suffix to subdirectory name
+- `--show_gt` without `-p` → adds `_gt_only` suffix to subdirectory name
+
+Example directory structure:
+```
+output/
+  half_monodgp_kd_style/
+    ├── day/           # --imagedir image_2 (without --show_gt)
+    ├── night/         # --imagedir night_2 (without --show_gt) 
+    ├── day_gt/        # --imagedir image_2 --show_gt -p (GT + predictions)
+    ├── night_gt/      # --imagedir night_2 --show_gt -p (GT + predictions)
+    ├── day_gt_only/   # --imagedir image_2 --show_gt (GT only, no predictions)
+    └── night_gt_only/ # --imagedir night_2 --show_gt (GT only, no predictions)
+```
 
 Show LiDAR and image with specific index
 ```

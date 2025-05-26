@@ -1056,6 +1056,30 @@ if __name__ == "__main__":
         assert os.path.exists(args.dir + "/" + args.split + "/pred")
     
     OUTPUT_DIR = os.path.join(ROOT_DIR, "kitti_object_vis", "output", args.outdir)
+    
+    # Create subdirectory based on image type and GT settings
+    subdir_name = ""
+    
+    # Determine image type (day/night)
+    if args.imagedir == "night_2":
+        subdir_name = "night"
+    elif args.imagedir == "image_2":
+        subdir_name = "day"
+    else:
+        # For other custom image directories, use the directory name directly
+        subdir_name = args.imagedir.replace("_", "")
+    
+    # Add GT suffix based on prediction and GT settings
+    if args.show_gt and not args.pred:
+        # Only showing GT, no predictions
+        subdir_name += "_gt_only"
+    elif args.show_gt and args.pred:
+        # Showing both GT and predictions
+        subdir_name += "_gt"
+    # If not showing GT (default), no suffix is added
+    
+    # Create the final output directory with subdirectory
+    OUTPUT_DIR = os.path.join(OUTPUT_DIR, subdir_name)
 
     # Create output directory with proper permissions
     try:
@@ -1064,7 +1088,7 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"Error creating output directory: {e}")
         # Fallback to /tmp if home directory is not writable
-        OUTPUT_DIR = os.path.join("/tmp", "kitti_output", args.outdir)
+        OUTPUT_DIR = os.path.join("/tmp", "kitti_output", args.outdir, subdir_name)
         os.makedirs(OUTPUT_DIR, exist_ok=True)
         print(f"Using fallback output directory: {OUTPUT_DIR}")
     
